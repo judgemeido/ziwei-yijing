@@ -7,6 +7,8 @@ import {
   mutagenInPalace,
   palaceSynthesis,
   chartOverview,
+  PALACE_DETAIL,
+  auxStarLore,
 } from "../content/interpretations";
 
 const MUT_CLASS: Record<string, string> = {
@@ -45,6 +47,13 @@ export function createReading(root: HTMLElement): ReadingUI {
       const item = accHead.closest(".how-item") as HTMLElement;
       const on = item.classList.toggle("on");
       accHead.setAttribute("aria-expanded", String(on));
+      return;
+    }
+    const rkHead = target.closest(".rk-acc-head") as HTMLElement | null;
+    if (rkHead) {
+      const item = rkHead.closest(".rk-acc") as HTMLElement;
+      const on = item.classList.toggle("on");
+      rkHead.setAttribute("aria-expanded", String(on));
     }
   });
 
@@ -128,15 +137,31 @@ export function createReading(root: HTMLElement): ReadingUI {
           const base = STAR_LORE[s.name];
           const bri = s.brightness ? '<span class="rk-bri">' + s.brightness + "</span>" : "";
           const mut = s.mutagen ? '<i class="mut ' + (MUT_CLASS[s.mutagen] ?? "") + '">' + s.mutagen + "</i>" : "";
-          const baseLine = base ? '<p class="rk-star-base">' + base + "</p>" : "";
-          return '<li class="rk-star"><div class="rk-star-head"><b>' + s.name + "</b>" + bri + mut + '</div><p class="rk-star-desc">' + lede + "</p>" + baseLine + "</li>";
+          const baseLine = base ? '<p class="rk-star-base"><b>星性</b>' + base + "</p>" : "";
+          const briNote = s.brightness ? '<p class="rk-star-base"><b>庙陷</b>此星于本宫为「' + s.brightness + "」,庙旺则吉性彰、落陷则力减,须按亮度斟酌强弱。</p>" : "";
+          const mutNote = s.mutagen ? '<p class="rk-star-base"><b>四化</b>本星化' + s.mutagen + "," + (MUTAGEN_LORE[s.mutagen!]?.desc ?? "") + "</p>" : "";
+          return '<div class="rk-acc rk-star-acc">' +
+            '<button type="button" class="rk-acc-head" aria-expanded="false">' +
+              '<span class="rk-acc-title"><b>' + s.name + "</b>" + bri + mut + "</span>" +
+              '<span class="rk-acc-sub">' + lede + "</span>" +
+              '<span class="rk-acc-chev" aria-hidden="true"></span>' +
+            "</button>" +
+            '<div class="rk-acc-body"><div class="rk-acc-inner">' + baseLine + briNote + mutNote + "</div></div>" +
+          "</div>";
         }).join("")
-      : '<li class="rk-star rk-empty"><p class="rk-star-desc">此宫无主星(空宫),吉凶多借对宫与三方会照之星,性情较随环境流转。</p></li>';
+      : '<div class="rk-acc rk-empty"><p class="rk-star-desc">此宫无主星(空宫),吉凶多借对宫与三方会照之星,性情较随环境流转。</p></div>';
 
     const minorHtml = minors.length
-      ? '<div class="rk-minor"><span class="rk-label">辅佐星曜</span><div class="rk-chips">' + minors.map((s) => {
+      ? '<div class="rk-minor"><span class="rk-label">辅佐星曜 · 点击展开</span><div class="rk-aux-list">' + minors.map((s) => {
+          const lore = auxStarLore(s.name, s.type);
           const mut = s.mutagen ? '<i class="mut ' + (MUT_CLASS[s.mutagen] ?? "") + '">' + s.mutagen + "</i>" : "";
-          return '<span class="chip">' + s.name + mut + "</span>";
+          return '<div class="rk-acc rk-aux">' +
+            '<button type="button" class="rk-acc-head" aria-expanded="false">' +
+              '<span class="rk-acc-title"><b>' + s.name + "</b>" + mut + '<em class="rk-aux-role">' + lore.role + "</em></span>" +
+              '<span class="rk-acc-chev" aria-hidden="true"></span>' +
+            "</button>" +
+            '<div class="rk-acc-body"><div class="rk-acc-inner"><p>' + lore.desc + "</p></div></div>" +
+          "</div>";
         }).join("") + "</div></div>"
       : "";
 
@@ -162,6 +187,11 @@ export function createReading(root: HTMLElement): ReadingUI {
           + '</div><p class="rk-trine-note">本宫与对宫、两三合宫互为「三方四正」,星曜彼此会照、吉凶相参,须合看方全。</p></div>'
       : "";
 
+    const detailHtml = '<div class="rk-acc rk-palace-acc">'
+      + '<button type="button" class="rk-acc-head" aria-expanded="false"><span class="rk-acc-title"><b>宫位详解</b><em class="rk-aux-role">如何看这一宫</em></span><span class="rk-acc-chev" aria-hidden="true"></span></button>'
+      + '<div class="rk-acc-body"><div class="rk-acc-inner"><p>' + (PALACE_DETAIL[p.name] ?? lore.desc) + '</p></div></div>'
+      + "</div>";
+
     const majorNames = majors.map((s) => s.name);
     const mutList = mutStars.map((s) => ({ name: s.name, mutagen: s.mutagen! }));
     const synthHtml = '<div class="rk-synth"><span class="rk-label">推导 · 综论</span><p>'
@@ -172,7 +202,8 @@ export function createReading(root: HTMLElement): ReadingUI {
       '<div class="rk-top"><span class="rk-branch">' + p.earthlyBranch + '</span>',
         '<div class="rk-title"><h3>' + p.name + "<small>" + lore.theme + '</small></h3><div class="rk-flags">' + flags.join("") + "</div></div></div>",
       '<p class="rk-desc">' + lore.desc + "</p>",
-      '<ul class="rk-stars">' + majorHtml + "</ul>",
+      detailHtml,
+      '<div class="rk-stars-wrap"><span class="rk-label">主星 · 点击展开</span><div class="rk-stars">' + majorHtml + "</div></div>",
       minorHtml,
       mutHtml,
       trineHtml,

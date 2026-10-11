@@ -1201,3 +1201,40 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   .gd-sheet { max-height: 94vh; }
   .gv-chips { margin-left: 0; }
 }
+
+
+/* ===== M16:读盘可展开详解(主星 / 辅佐星曜 / 宫位详解)===== */
+.rk-stars-wrap { margin-top: 4px; }
+.rk-stars-wrap > .rk-label { display: block; margin-bottom: 9px; }
+.rk-stars { display: flex; flex-direction: column; gap: 8px; }
+
+/* 通用读盘手风琴 */
+.rk-acc { border: 1px solid var(--hair-soft); border-radius: var(--r-md); background: rgba(255,255,255,0.025); overflow: hidden; transition: border-color var(--t-base) var(--e-out), background var(--t-base) var(--e-out); }
+.rk-acc + .rk-acc { margin-top: 8px; }
+.rk-acc.on { border-color: var(--accent-ring); background: rgba(110,123,255,0.06); }
+.rk-acc-head { width: 100%; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; padding: 11px 13px; background: none; border: 0; cursor: pointer; font-family: inherit; text-align: left; color: var(--fg); }
+.rk-acc-title { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+.rk-acc-title b { font-size: 0.9rem; font-weight: 700; }
+.rk-acc-sub { font-size: 0.76rem; color: var(--fg-2); line-height: 1.5; flex: 1 1 100%; opacity: 0.9; }
+.rk-acc-chev { margin-left: auto; width: 8px; height: 8px; border-right: 1.5px solid var(--fg-3); border-bottom: 1.5px solid var(--fg-3); transform: rotate(45deg) translateY(-2px); transition: transform var(--t-base) var(--e-out); flex: 0 0 auto; align-self: flex-start; margin-top: 5px; }
+.rk-acc.on .rk-acc-chev { transform: rotate(-135deg) translateY(-2px); }
+.rk-acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--t-base) var(--e-out); }
+.rk-acc.on .rk-acc-body { grid-template-rows: 1fr; }
+.rk-acc-inner { overflow: hidden; padding: 0 13px; }
+.rk-acc.on .rk-acc-inner { padding: 2px 13px 12px; }
+.rk-acc-inner p { font-size: 0.8rem; line-height: 1.72; color: var(--fg-2); }
+.rk-acc-inner p + p { margin-top: 7px; }
+.rk-acc-inner .rk-star-base { color: var(--fg-2); }
+.rk-acc-inner .rk-star-base b { color: var(--accent-2); font-weight: 700; margin-right: 6px; font-size: 0.72rem; }
+
+/* 辅佐星曜:紧凑网格,带星性角色标签 */
+.rk-aux-list { display: flex; flex-direction: column; gap: 8px; }
+.rk-aux .rk-acc-head { padding: 10px 13px; }
+.rk-aux-role { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; color: var(--accent-2); padding: 2px 7px; border: 1px solid var(--accent-ring); border-radius: 999px; background: rgba(110,123,255,0.1); }
+.rk-palace-acc { margin-top: 4px; }
+.rk-palace-acc .rk-acc-head b { color: var(--fg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rk-acc-body { transition: none; }
+  .rk-acc-chev { transition: none; }
+}
