@@ -1274,3 +1274,101 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 @media (max-width: 720px) {
   .ui-name-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ===== M18:手机端适配精修(≤720)===== */
+/* 命盘为「容器百分比」布局:环/宫位格/中宫均按 .wheel-wrap 百分比缩放。
+   手机端只需调好 wheel-wrap 尺寸 + 宫位格与中宫的占比,即可整体协调不溢出、不挤压。 */
+@media (max-width: 720px) {
+  #app { padding: 14px 14px 20px; gap: 16px; }
+  .masthead { gap: 12px; }
+  .mast-actions { gap: 8px; }
+  .mast-actions .switch { padding: 9px 15px; font-size: 0.8rem; }
+
+  /* 侧栏(起盘/卜卦/本命/读盘)可读 */
+  .side-tabs { position: sticky; top: 8px; z-index: 20; }
+  .side-tab { padding: 11px 0; font-size: 0.9rem; }
+
+  /* 星盘:占满宽度,略留边 */
+  .main { margin-top: 6px; }
+  .wheel-wrap { max-width: 94vw; }
+
+  /* 中宫:缩占比,给四维宫位让出间距(半径 ~40.5%,此宽度下不相撞) */
+  .wheel-center { width: 50%; }
+  .center-inner { gap: 6px; padding: 7%; }
+  .center-inner .seal { font-size: 1.05rem; letter-spacing: 0.14em; }
+  .center-inner .meta { grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .center-inner .meta div { justify-content: center; gap: 5px; }
+  .center-inner .meta dt { font-size: 0.54rem; }
+  .center-inner .meta dd { font-size: 0.74rem; }
+  .benming { gap: 7px; padding: 6px 9px; }
+  .center-inner .hex-text .hex-name { font-size: 0.9rem; }
+  .center-inner .dates { font-size: 0.54rem; }
+
+  /* 宫位格:单行紧凑、居中、不换行、不显示星名(保留命/身徽记) */
+  .cell { max-width: 22%; min-width: 0; padding: 5px 6px; gap: 2px; white-space: nowrap; text-align: center; }
+  .cell-head { gap: 3px; flex-wrap: nowrap; justify-content: center; }
+  .cell .pname { font-size: 0.68rem; }
+  .cell .branch { font-size: 0.5rem; padding: 0 3px; }
+  .cell .flag { font-size: 0.48rem; padding: 1px 4px; }
+  .cell-stars { display: none; }
+  .cell.is-selected, .cell:hover { transform: translate(-50%, -50%) scale(1.05) !important; }
+
+  /* 后天八卦环文字按比例缩小,与小盘协调 */
+  .wheel-rings .bagua-sym { font-size: 30px; }
+  .wheel-rings .bagua-name { font-size: 17px; }
+
+  /* 下拉弹层:限宽贴合小屏,列宽收紧 */
+  .ui-pop { max-width: calc(100vw - 20px); padding: 9px; }
+  .ui-cols { gap: 5px; }
+  .ui-col { min-width: 46px; }
+  .ui-pop-single .ui-col { min-width: min(66vw, 220px); }
+  .ui-col-list { height: clamp(150px, 42vh, 240px); }
+  .ui-opt { padding: 9px 8px; font-size: 0.88rem; }
+  .ui-nowbtn { padding: 11px 0; }
+
+  /* 读盘 / 卜卦 手风琴:触控更友好 */
+  .rk-acc-head, .how-head, .div-acc-head, .acc-head { padding-top: 13px; padding-bottom: 13px; }
+  .rk-acc-sub { font-size: 0.78rem; }
+  .div-acc-head { flex-wrap: wrap; }
+  .div-acc-tag { margin-left: 0; }
+
+  /* 三方四正网格:两列更舒展 */
+  .rk-trine-grid { grid-template-columns: 1fr 1fr; }
+
+  /* 结果弹窗 / 解读弹窗:占满小屏、底部留白避免被手势条遮挡 */
+  .rv-sheet { width: 100%; max-height: 100dvh; border-radius: var(--r-lg); }
+  .rv-print { padding: 18px 16px calc(28px + env(safe-area-inset-bottom)); }
+  .rv-head { padding: 18px 16px 14px; }
+  .rv-title { font-size: 1.2rem; }
+  .rv-actions { flex-wrap: wrap; }
+  .gd-sheet { width: 100%; max-height: 100dvh; border-radius: var(--r-lg); }
+  .gd-scroll { padding: 16px 16px calc(26px + env(safe-area-inset-bottom)); }
+  .gv-chips { margin-left: 0; width: 100%; }
+}
+
+/* 中屏手机(≤460):中宫与宫位格微调 */
+@media (max-width: 460px) {
+  .wheel-center { width: 52%; }
+  .cell { max-width: 23%; padding: 4px 5px; }
+  .cell .pname { font-size: 0.66rem; }
+  .wheel-rings .bagua-sym { font-size: 28px; }
+  .wheel-rings .bagua-name { font-size: 15px; }
+}
+
+/* 超窄屏(≤360)再紧一档 */
+@media (max-width: 360px) {
+  .wheel-center { width: 54%; }
+  .center-inner .meta { grid-template-columns: 1fr; gap: 3px; }
+  .center-inner .meta div { justify-content: flex-start; }
+  .cell .pname { font-size: 0.62rem; }
+  .cell .branch { display: none; }
+  .side-tab { font-size: 0.84rem; }
+  .ui-col { min-width: 42px; }
+  .ui-opt { font-size: 0.84rem; padding: 8px 6px; }
+}
+
+/* 横屏手机:降低中宫占比,避免星盘过小 */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 480px) {
+  .wheel-wrap { max-width: min(80vh, 94vw); }
+  .center-inner .dates { display: none; }
+}
