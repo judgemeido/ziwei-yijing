@@ -1238,3 +1238,39 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   .rk-acc-body { transition: none; }
   .rk-acc-chev { transition: none; }
 }
+
+
+/* ===== M17:姓/名分格输入 + 卜卦可展开深度详解 ===== */
+.ui-name-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: 9px; }
+.ui-name-part { width: 100%; }
+.ui-input { background: rgba(255,255,255,0.045); border: 1px solid var(--hair); border-radius: var(--r-md); padding: 13px 15px; color: var(--fg); font-family: inherit; font-size: 0.95rem; font-weight: 500; transition: border-color var(--t-base) var(--e-out), box-shadow var(--t-base) var(--e-out), background var(--t-base) var(--e-out); }
+.ui-input::placeholder { color: var(--fg-3); font-weight: 400; }
+.ui-input:focus { outline: none; border-color: var(--accent-ring); background: rgba(255,255,255,0.07); box-shadow: 0 0 0 4px rgba(110,123,255,0.16); }
+
+/* 卜卦深度详解手风琴 */
+.div-accordion { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.div-accordion > .rk-label { display: block; margin-bottom: 2px; }
+.div-acc { border: 1px solid var(--hair-soft); border-radius: var(--r-md); background: rgba(255,255,255,0.025); overflow: hidden; transition: border-color var(--t-base) var(--e-out), background var(--t-base) var(--e-out); }
+.div-acc.on { border-color: var(--accent-ring); background: rgba(110,123,255,0.06); }
+.div-acc-head { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 13px; background: none; border: 0; cursor: pointer; font-family: inherit; text-align: left; color: var(--fg); }
+.div-acc-title { font-size: 0.86rem; font-weight: 700; flex: 0 0 auto; }
+.div-acc-tag { font-size: 0.64rem; font-weight: 600; color: var(--accent-2); padding: 2px 8px; border: 1px solid var(--accent-ring); border-radius: 999px; background: rgba(110,123,255,0.1); white-space: nowrap; }
+.div-acc-chev { margin-left: auto; width: 8px; height: 8px; border-right: 1.5px solid var(--fg-3); border-bottom: 1.5px solid var(--fg-3); transform: rotate(45deg) translateY(-2px); transition: transform var(--t-base) var(--e-out); flex: 0 0 auto; }
+.div-acc.on .div-acc-chev { transform: rotate(-135deg) translateY(-2px); }
+.div-acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--t-base) var(--e-out); }
+.div-acc.on .div-acc-body { grid-template-rows: 1fr; }
+.div-acc-inner { overflow: hidden; padding: 0 13px; }
+.div-acc.on .div-acc-inner { padding: 2px 13px 13px; }
+.div-acc-inner p { font-size: 0.82rem; line-height: 1.78; color: var(--fg-2); }
+.div-acc-inner p + p { margin-top: 8px; }
+.div-acc-inner p b { color: var(--accent-2); font-weight: 700; }
+.div-classic-inner .cq { font-family: "Noto Serif SC", "Songti SC", "SimSun", "STSong", serif; font-size: 0.9rem; line-height: 1.9; color: var(--fg); opacity: 0.95; letter-spacing: 0.03em; }
+.div-classic-inner .cl-src { display: inline-block; font-family: var(--font); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; color: var(--accent-2); margin-right: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .div-acc-body { transition: none; }
+  .div-acc-chev { transition: none; }
+}
+@media (max-width: 720px) {
+  .ui-name-grid { grid-template-columns: 1fr 1fr; }
+}

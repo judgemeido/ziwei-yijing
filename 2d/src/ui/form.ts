@@ -234,21 +234,34 @@ export function createForm(root: HTMLElement): FormUI {
   form.appendChild(title);
   form.appendChild(sub);
 
-  // 姓名(中文)
-  const nameField = document.createElement("label");
+  // 姓名(中文):姓 / 名 分格,复姓亦可准确识别
+  const nameField = document.createElement("div");
   nameField.className = "ui-field";
   const nameLabel = document.createElement("span");
   nameLabel.className = "ui-label";
   nameLabel.textContent = "姓名(中文)";
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.name = "name";
-  nameInput.className = "ui-input";
-  nameInput.maxLength = 8;
-  nameInput.placeholder = "如 李世民";
-  nameInput.autocomplete = "off";
+  const nameGrid = document.createElement("div");
+  nameGrid.className = "ui-name-grid";
+  const surnameInput = document.createElement("input");
+  surnameInput.type = "text";
+  surnameInput.name = "surname";
+  surnameInput.className = "ui-input ui-name-part";
+  surnameInput.maxLength = 4;
+  surnameInput.placeholder = "姓 · 如 欧阳";
+  surnameInput.autocomplete = "off";
+  surnameInput.setAttribute("aria-label", "姓");
+  const givenInput = document.createElement("input");
+  givenInput.type = "text";
+  givenInput.name = "given";
+  givenInput.className = "ui-input ui-name-part";
+  givenInput.maxLength = 6;
+  givenInput.placeholder = "名 · 如 修";
+  givenInput.autocomplete = "off";
+  givenInput.setAttribute("aria-label", "名");
+  nameGrid.appendChild(surnameInput);
+  nameGrid.appendChild(givenInput);
   nameField.appendChild(nameLabel);
-  nameField.appendChild(nameInput);
+  nameField.appendChild(nameGrid);
   form.appendChild(nameField);
 
   // 公历生日(年/月/日)
@@ -367,7 +380,8 @@ export function createForm(root: HTMLElement): FormUI {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = nameInput.value;
+    const surname = surnameInput.value.trim();
+    const given = givenInput.value.trim();
     const genderInput = form.querySelector("input[name=\"gender\"]:checked") as HTMLInputElement | null;
     const gender = (genderInput ? genderInput.value : "male") as "male" | "female";
     const input: BirthInput = {
@@ -383,7 +397,7 @@ export function createForm(root: HTMLElement): FormUI {
     submitBtn.textContent = "起 卦 中…";
 
     const dataPromise = buildChart(input).then(async (chart) => {
-      const divination = await divine(name, castTime, chart.lunar);
+      const divination = await divine({ surname, given }, castTime, chart.lunar);
       return [chart, divination] as const;
     });
     // 起卦仪式动画:等待数据就绪并以真实卦象落爻,仪式收场即揭示命盘(消除滞后)。

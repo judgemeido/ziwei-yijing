@@ -361,3 +361,53 @@ export const HEX_CLASSIC: Record<string, HexClassic> = {
 export function hexClassic(name: string): HexClassic | null {
   return HEX_CLASSIC[name] ?? null;
 }
+
+
+// ---- 卜卦深度详解:五行卦气 + 爻位 + 结构(供 UI 点击展开)----
+const TRIGRAM_WUXING: Record<string, string> = {
+  乾: "金", 兑: "金", 离: "火", 震: "木", 巽: "木", 坎: "水", 艮: "土", 坤: "土",
+};
+
+// 五行相生:木→火→土→金→水→木;相克:木→土→水→火→金→木。
+const SHENG: Record<string, string> = { 木: "火", 火: "土", 土: "金", 金: "水", 水: "木" };
+const KE: Record<string, string> = { 木: "土", 土: "水", 水: "火", 火: "金", 金: "木" };
+
+export interface HexWuxing {
+  upperWx: string;
+  lowerWx: string;
+  relation: string; // 内外五行关系判语
+}
+
+/** 卦气:上(外)下(内)卦五行与其生克关系。下卦为内·主自身,上卦为外·主环境。 */
+export function hexWuxing(hex: Hexagram): HexWuxing {
+  const up = TRIGRAM_WUXING[hex.upper.name] ?? "土";
+  const lo = TRIGRAM_WUXING[hex.lower.name] ?? "土";
+  let relation: string;
+  if (up === lo) {
+    relation = "内外同为" + up + "行,比和之象:上下气类相投,行事顺遂、少有扞格,然亦须防安于现状、缺乏变化之机。";
+  } else if (SHENG[lo] === up) {
+    relation = "下卦" + lo + "生上卦" + up + ",内生外:自身之力顺势外发,付出而有回响,主努力能见成效、积极进取为宜。";
+  } else if (SHENG[up] === lo) {
+    relation = "上卦" + up + "生下卦" + lo + ",外生内:环境机缘来助自身,主易得外力提携、贵人相扶,宜顺势承接。";
+  } else if (KE[lo] === up) {
+    relation = "下卦" + lo + "克上卦" + up + ",内克外:自身主动制约环境,主能掌控局面、以我为主,然用力过猛则招阻,宜刚中带柔。";
+  } else {
+    relation = "上卦" + up + "克下卦" + lo + ",外克内:环境形势压制自身,主外有牵制、处境受限,宜忍耐守正、待时而动,不宜强出。";
+  }
+  return { upperWx: up, lowerWx: lo, relation };
+}
+
+// 爻位义:初(事始)、二(内卦中·得位)、三(内外交界·多危)、四(近君·多惧)、五(尊位·主事)、上(事终·亢极)。
+const YAO_POS: Record<number, { name: string; lore: string }> = {
+  1: { name: "初爻", lore: "初爻居一卦之始,主事情的开端与根基。此时势微力弱、宜潜宜守,打好基础胜于急进,所谓「潜龙勿用」。" },
+  2: { name: "二爻", lore: "二爻居内卦之中,柔顺得中、多主吉顺。是立身行事最安稳的位置,守中持正则事可成,利于稳步推进。" },
+  3: { name: "三爻", lore: "三爻处内外卦交界,位多不正、险象丛生。正是转折与考验之地,行事须格外谨慎,「君子终日乾乾,夕惕若厉」。" },
+  4: { name: "四爻", lore: "四爻近君之位、上下难安,多疑惧之象。进退之间须审时度势,伴强者而行、谨守本分则可无咎。" },
+  5: { name: "五爻", lore: "五爻居尊位、刚健中正,是一卦之主爻,多主大吉。此时居高任重、名正势顺,正是施展抱负、成就大事之时。" },
+  6: { name: "上爻", lore: "上爻居一卦之极,物极必反、亢龙有悔。事已至终、盛极将衰,宜知止知退、功成身退,不可一味强求。" },
+};
+
+/** 动爻的爻位含义(1-6)。past(互卦)无动爻时返回 null。 */
+export function yaoPositionLore(movingLine: number): { name: string; lore: string } | null {
+  return YAO_POS[movingLine] ?? null;
+}

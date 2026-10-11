@@ -83,3 +83,25 @@ export async function nameStrokes(name: string): Promise<NameStrokeResult> {
   const engine = await getEngine();
   return engine(name.trim());
 }
+
+/** 以显式「姓 / 名」计算康熙(繁体近似)笔画,复姓亦准确。 */
+export async function nameStrokesSplit(surname: string, given: string): Promise<NameStrokeResult> {
+  const engine = await getEngine();
+  const sName = (surname || "").trim();
+  const gName = (given || "").trim();
+  const sRes = engine(sName);
+  const gRes = engine(gName);
+  const perChar = [...sRes.perChar, ...gRes.perChar];
+  const total = perChar.reduce((a, c) => a + c.strokes, 0);
+  return {
+    input: sName + gName,
+    tradName: perChar.map((p) => p.trad).join(""),
+    perChar,
+    total,
+    surnameCount: sRes.perChar.length,
+    surname: sName,
+    given: gName,
+    surnameStrokes: sRes.total,
+    givenStrokes: gRes.total,
+  };
+}

@@ -1,6 +1,6 @@
 import type { ChartModel, LunarInfo } from "./types";
 import { castByNameTime, nuclearHexagram, changedHexagram, deriveHexagram, castDeriv, branchNum, type Hexagram, type HexDeriv } from "./iching";
-import { nameStrokes, type NameStrokeResult } from "./strokes";
+import { nameStrokesSplit, type NameStrokeResult } from "./strokes";
 import { solarToLunarGanzhi } from "./astrology";
 
 export type DivTense = "past" | "present" | "future";
@@ -31,8 +31,13 @@ function fmtDate(d: Date): string {
  * 本卦=当下、互卦=过去/来路、变卦=未来/走向。
  * 生辰八字(出生年支/月/日/时支)并入起卦,姓定上卦根基、名并卜时定下卦。
  */
-export async function divine(name: string, castTime: Date, birthLunar: LunarInfo): Promise<Divination> {
-  const nameInfo = name.trim() ? await nameStrokes(name) : null;
+export interface NameParts { surname: string; given: string; }
+
+export async function divine(nameParts: NameParts, castTime: Date, birthLunar: LunarInfo): Promise<Divination> {
+  const surname = (nameParts.surname || "").trim();
+  const given = (nameParts.given || "").trim();
+  const fullName = (surname + given).trim();
+  const nameInfo = fullName ? await nameStrokesSplit(surname, given) : null;
   const surnameStrokes = nameInfo?.surnameStrokes ?? 0;
   const givenStrokes = nameInfo?.givenStrokes ?? 0;
 
@@ -80,7 +85,7 @@ export async function divine(name: string, castTime: Date, birthLunar: LunarInfo
   });
 
   return {
-    name: name.trim(),
+    name: fullName,
     nameInfo,
     castTime,
     castSolar,
