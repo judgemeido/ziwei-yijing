@@ -6,6 +6,7 @@ import {
   starInPalace,
   mutagenInPalace,
   palaceSynthesis,
+  chartOverview,
 } from "../content/interpretations";
 
 const MUT_CLASS: Record<string, string> = {
@@ -15,6 +16,7 @@ const MUT_CLASS: Record<string, string> = {
 export interface ReadingUI {
   show: (chart: ChartModel, index: number) => void;
   clear: () => void;
+  setChart: (chart: ChartModel | null) => void;
   onClose: (fn: () => void) => void;
 }
 
@@ -29,41 +31,85 @@ export function createReading(root: HTMLElement): ReadingUI {
   root.appendChild(el);
 
   let closeHandler: (() => void) | null = null;
+  let cachedChart: ChartModel | null = null;
 
   el.addEventListener("click", (e) => {
-    if ((e.target as HTMLElement).closest(".reading-close")) {
+    const target = e.target as HTMLElement;
+    if (target.closest(".reading-close")) {
       hint();
       closeHandler?.();
+      return;
+    }
+    const accHead = target.closest(".how-head") as HTMLElement | null;
+    if (accHead) {
+      const item = accHead.closest(".how-item") as HTMLElement;
+      const on = item.classList.toggle("on");
+      accHead.setAttribute("aria-expanded", String(on));
     }
   });
+
+  const HOWTO = [
+    { k: "起盘", d: "填入姓名(中文汉字,参与起卦)、公历生辰与性别,点「起盘起卦」。姓名笔画会并入卜卦,生辰则定出紫微命盘。" },
+    { k: "看盘", d: "外环是后天八卦与廿四向,十二宫按地支如时钟环布,中宫为命主、身主与本命卦。标「命」为命宫、标「身」为身宫。" },
+    { k: "读盘", d: "点任一宫位,查看宫义、主星「星×宫」解读、四化重点、三方四正会照与推导综论——这是逐宫深读的入口。" },
+    { k: "卜卦", d: "切到「卜卦」页,以姓名并当下时间起卦,再切换过去(互卦)·当下(本卦)·未来(变卦)三时态对照。" },
+    { k: "本命", d: "切到「本命」页,看由出生时刻起出的本命卦及其推演,可与紫微命盘互为参照。" },
+    { k: "解读", d: "点右上角「解读」按钮,查看本盘命宫 / 身宫 / 四化的专属综述,以及各核心概念的通俗详解。" },
+  ];
+
+  function overviewBlock(): string {
+    if (!cachedChart) return "";
+    const o = chartOverview(cachedChart);
+    const mutClass: Record<string, string> = { 禄: "mut-lu", 权: "mut-quan", 科: "mut-ke", 忌: "mut-ji" };
+    const mutChips = o.mutagens.length
+      ? o.mutagens.map((m) => '<span class="chip"><i class="mut ' + (mutClass[m.mutagen] ?? "") + '">' + m.label + "</i>" + m.star + "·" + m.palace + "</span>").join("")
+      : '<span class="chip rk-empty-chip">本盘无四化落点</span>';
+    return [
+      '<div class="rk-overview"><span class="rk-label">本盘速览 · 命 / 身 / 四化</span>',
+        '<div class="ov-line"><em class="flag soul">命</em><p><b>命宫在' + o.soul.branch + "宫</b>" + "·" + (o.soul.majors.length ? o.soul.majors.join("、") : "空宫") + "</p></div>",
+        '<div class="ov-line"><em class="flag body">身</em><p><b>身宫在' + o.body.branch + "宫</b>" + "·" + (o.body.same ? "与命宫同宫" : (o.body.majors.length ? o.body.majors.join("、") : "空宫")) + "</p></div>",
+        '<div class="ov-muts">' + mutChips + "</div>",
+        '<p class="ov-more">更详尽的综述,点右上角「解读」。</p>',
+      "</div>",
+    ].join("");
+  }
+
+  function howtoBlock(): string {
+    const items = HOWTO.map((it, i) => {
+      const on = i === 0 ? " on" : "";
+      const exp = i === 0 ? "true" : "false";
+      return '<div class="how-item' + on + '">' +
+        '<button type="button" class="how-head" aria-expanded="' + exp + '"><span class="how-k">' + it.k + '</span><span class="how-chev" aria-hidden="true"></span></button>' +
+        '<div class="how-body"><div class="how-inner"><p>' + it.d + "</p></div></div>" +
+      "</div>";
+    }).join("");
+    return '<div class="how-accordion">' + items + "</div>";
+  }
 
   function hint(): void {
     el.innerHTML = [
       '<div class="reading-guide">',
+        overviewBlock(),
         '<h3 class="guide-title">命盘使用方法</h3>',
-        '<ol class="guide-steps">',
-          '<li><b>起盘</b>:填入姓名、公历生辰与性别,点「起盘起卦」生成圆形星盘。</li>',
-          '<li><b>看盘</b>:外环为后天八卦与廿四向,十二宫按地支时钟分布,中宫为命主与本命卦。</li>',
-          '<li><b>读盘</b>:点任一宫位,查看宫义、主星「星×宫」、四化、三方四正与推导综论。</li>',
-          '<li><b>卜卦</b>:在「卜卦」页以姓名并当下时间起卦,切换过去(互卦)·当下(本卦)·未来(变卦)。</li>',
-          '<li><b>本命</b>:在「本命」页看由出生起出的本命卦及其推导。</li>',
-        '</ol>',
+        '<p class="guide-hint-sm howtop">点标题展开每一步的详细用法。</p>',
+        howtoBlock(),
         '<div class="guide-legend">',
           '<span class="rk-label">图例</span>',
           '<div class="legend-row">',
             '<span class="lg"><em class="flag soul">命</em>命宫</span>',
             '<span class="lg"><em class="flag body">身</em>身宫</span>',
             '<span class="lg"><i class="mut mut-lu">禄</i><i class="mut mut-quan">权</i><i class="mut mut-ke">科</i><i class="mut mut-ji">忌</i>四化</span>',
-          '</div>',
-          '<p class="guide-hint-sm">点击任意宫位,开始读盘。</p>',
-        '</div>',
-      '</div>',
+          "</div>",
+          '<p class="guide-hint-sm">点击任意宫位,开始读盘。',
+        "</div>",
+      "</div>",
     ].join("");
   }
 
   function clear(): void { hint(); }
 
   function show(chart: ChartModel, index: number): void {
+    cachedChart = chart;
     const p = chart.palaces.find((x) => x.index === index);
     if (!p) { hint(); return; }
     const lore = PALACE_LORE[p.name];
@@ -139,6 +185,7 @@ export function createReading(root: HTMLElement): ReadingUI {
   return {
     show,
     clear,
+    setChart: (chart) => { cachedChart = chart; },
     onClose: (fn) => { closeHandler = fn; },
   };
 }

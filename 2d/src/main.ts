@@ -6,6 +6,7 @@ import { createReading } from "./ui/reading";
 import { createBenming } from "./ui/benming";
 import { createDivination } from "./ui/divination";
 import { createResultView } from "./ui/resultView";
+import { createGuide } from "./ui/guide";
 import { benmingOf } from "./engine/divination";
 import type { ChartModel } from "./engine/types";
 import type { Divination } from "./engine/divination";
@@ -22,6 +23,7 @@ app.innerHTML = `
       <p class="sub">紫微斗数 · 易经星盘</p>
     </div>
     <div class="mast-actions">
+      <button type="button" class="switch" id="btn-guide">解读</button>
       <button type="button" class="switch" id="btn-result" hidden>占卜结果 →</button>
     </div>
   </header>
@@ -83,6 +85,9 @@ const links = createLinks(boardWrap, grid);
 grid.renderPlaceholder(); // 默认即显示卦盘(占位态),起盘后以动画填充
 
 const resultView = createResultView(document.body);
+const guide = createGuide(document.body);
+const btnGuide = document.getElementById("btn-guide") as HTMLButtonElement;
+btnGuide.addEventListener("click", () => { guide.open(currentChart); });
 
 let currentChart: ChartModel | null = null;
 let currentDiv: Divination | null = null;
@@ -106,6 +111,7 @@ form.onResult(({ chart, divination }: FormResult) => {
   benmingName = benmingOf(chart).name;
   (window as unknown as { __chart?: unknown }).__chart = chart;
   grid.render(chart);
+  reading.setChart(chart);
   benming.render(chart);
   divUI.render(divination);
   btnResult.hidden = false;

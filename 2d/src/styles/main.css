@@ -1117,3 +1117,87 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   .brand-sigil { animation: none; opacity: 0.95; }
   .cast-sigil .sigil-box { opacity: 1; }
 }
+
+
+/* ===== M15:解读弹窗(全屏) + 使用方法手风琴 + 本盘速览 ===== */
+
+/* 右上角「解读」按钮:与 .switch 同族,给一点强调 */
+#btn-guide { border-color: var(--accent-ring); background: rgba(110,123,255,0.12); }
+#btn-guide:hover { background: rgba(110,123,255,0.2); }
+
+/* 全屏解读弹窗(复用 result-overlay 的玻璃语言) */
+.guide-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: clamp(12px, 3vw, 44px); }
+.guide-overlay[hidden] { display: none; }
+.gd-scrim { position: absolute; inset: 0; background: rgba(4,5,10,0.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); animation: fadeIn var(--t-base) var(--e-out) both; }
+.gd-sheet { position: relative; z-index: 1; width: min(680px, 100%); max-height: 90vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #141a2e, var(--bg-2)); border: 1px solid var(--hair-strong); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); animation: sheetIn var(--t-slow) var(--e-spring) both; overflow: hidden; }
+.gd-head { flex: 0 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 22px 24px 16px; border-bottom: 1px solid var(--hair-soft); }
+.gd-kicker { font-size: 0.64rem; letter-spacing: 0.16em; color: var(--accent-2); }
+.gd-title { font-size: 1.4rem; font-weight: 700; color: var(--fg); margin-top: 4px; }
+.gd-close { width: 38px; height: 38px; border: 1px solid var(--hair-strong); background: var(--glass-2); color: var(--fg); font-size: 1.1rem; border-radius: 999px; cursor: pointer; transition: transform var(--t-fast) var(--e-spring), border-color var(--t-base) var(--e-out), background var(--t-base) var(--e-out); }
+.gd-close:hover { transform: translateY(-1px); border-color: var(--accent-ring); background: rgba(110,123,255,0.18); }
+.gd-close:active { transform: scale(0.96); }
+.gd-scroll { overflow-y: auto; padding: 20px 24px 26px; }
+.gd-section + .gd-section { margin-top: 22px; }
+.gd-label { display: block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent-2); margin-bottom: 12px; }
+.gd-empty { font-size: 0.86rem; line-height: 1.7; color: var(--fg-2); padding: 14px 15px; border: 1px dashed var(--hair); border-radius: var(--r-md); }
+
+/* 本盘速览三卡 */
+.gv-grid { display: flex; flex-direction: column; gap: 12px; }
+.gv-card { border: 1px solid var(--hair-soft); border-radius: var(--r-md); padding: 14px 15px; background: rgba(255,255,255,0.03); }
+.gv-card-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 9px; }
+.gv-card-head h3 { font-size: 0.98rem; font-weight: 700; color: var(--fg); }
+.gv-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.gv-dot.soul { background: var(--accent-2); box-shadow: 0 0 8px rgba(100,210,255,0.7); }
+.gv-dot.body { background: var(--accent); box-shadow: 0 0 8px rgba(110,123,255,0.7); }
+.gv-dot.mut { background: var(--mut-quan); box-shadow: 0 0 8px rgba(255,211,77,0.6); }
+.gv-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.gv-chip { font-size: 0.72rem; font-weight: 600; color: var(--fg); padding: 3px 10px; border: 1px solid var(--hair); border-radius: 999px; background: var(--glass); }
+.gv-chip.gv-empty { color: var(--fg-3); }
+.gv-card p { font-size: 0.84rem; line-height: 1.74; color: var(--fg-2); }
+.gv-mut { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.gv-mut li { display: flex; gap: 10px; align-items: flex-start; }
+.gv-mut-body { display: flex; flex-direction: column; gap: 2px; }
+.gv-mut-body b { font-size: 0.78rem; color: var(--fg); }
+.gv-mut-body span { font-size: 0.8rem; line-height: 1.66; color: var(--fg-2); }
+.gv-none { font-size: 0.8rem; color: var(--fg-3); }
+
+/* 手风琴(解读弹窗概念详解 + 读盘使用方法通用) */
+.guide-accordion, .how-accordion { display: flex; flex-direction: column; gap: 8px; }
+.acc-item, .how-item { border: 1px solid var(--hair-soft); border-radius: var(--r-md); background: rgba(255,255,255,0.025); overflow: hidden; transition: border-color var(--t-base) var(--e-out), background var(--t-base) var(--e-out); }
+.acc-item.on, .how-item.on { border-color: var(--accent-ring); background: rgba(110,123,255,0.06); }
+.acc-head, .how-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: none; border: 0; cursor: pointer; font-family: inherit; text-align: left; color: var(--fg); }
+.acc-term { font-size: 0.9rem; font-weight: 700; }
+.how-k { font-size: 0.86rem; font-weight: 700; }
+.acc-tag { font-size: 0.66rem; font-weight: 600; color: var(--accent-2); padding: 2px 8px; border: 1px solid var(--accent-ring); border-radius: 999px; background: rgba(110,123,255,0.1); }
+.acc-chev, .how-chev { margin-left: auto; width: 9px; height: 9px; border-right: 1.5px solid var(--fg-3); border-bottom: 1.5px solid var(--fg-3); transform: rotate(45deg) translateY(-2px); transition: transform var(--t-base) var(--e-out); flex: 0 0 auto; }
+.acc-item.on .acc-chev, .how-item.on .how-chev { transform: rotate(-135deg) translateY(-2px); }
+.acc-body, .how-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--t-base) var(--e-out); }
+.acc-item.on .acc-body, .how-item.on .how-body { grid-template-rows: 1fr; }
+.acc-inner, .how-inner { overflow: hidden; }
+.acc-inner { padding: 0 14px; }
+.how-inner { padding: 0 14px; }
+.acc-item.on .acc-inner { padding: 2px 14px 14px; }
+.how-item.on .how-inner { padding: 2px 14px 13px; }
+.acc-inner p, .how-inner p { font-size: 0.82rem; line-height: 1.76; color: var(--fg-2); }
+.acc-inner p + p { margin-top: 8px; }
+
+/* 读盘默认态:本盘速览块 + 使用方法提示 */
+.rk-overview { margin-bottom: 16px; padding: 12px 13px; border: 1px solid var(--hair-soft); border-radius: var(--r-md); background: linear-gradient(180deg, rgba(110,123,255,0.07), rgba(255,255,255,0.02)); }
+.rk-overview .rk-label { margin-bottom: 10px; display: block; }
+.ov-line { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; }
+.ov-line p { font-size: 0.8rem; line-height: 1.6; color: var(--fg-2); }
+.ov-line b { color: var(--fg); font-weight: 700; }
+.ov-muts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.ov-muts .chip { font-size: 0.72rem; }
+.rk-empty-chip { color: var(--fg-3); }
+.ov-more { margin-top: 10px; font-size: 0.72rem; color: var(--fg-3); letter-spacing: 0.02em; }
+.guide-hint-sm.howtop { margin-top: 10px; margin-bottom: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .acc-body, .how-body { transition: none; }
+  .acc-chev, .how-chev { transition: none; }
+}
+@media (max-width: 720px) {
+  .gd-sheet { max-height: 94vh; }
+  .gv-chips { margin-left: 0; }
+}

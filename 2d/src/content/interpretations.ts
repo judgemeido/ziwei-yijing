@@ -1,6 +1,6 @@
 // 紫微斗数解读文案(M4:星×宫 细化 + 四化按宫深化)。仅供文化娱乐。
 
-import type { PalaceName, Mutagen } from "../engine/types";
+import type { PalaceName, Mutagen, ChartModel } from "../engine/types";
 
 export interface PalaceLore {
   theme: string; // 一词主题
@@ -213,4 +213,70 @@ export function palaceSynthesis(
     ? "综观:立定本心、顺性而为,乃全盘吉凶之根本"
     : "综观:于" + domain + "一事,顺其星性之长、避其所忌,则事半而功倍");
   return segs.join(",") + "。";
+}
+
+
+// ---- 全盘速览:命宫 / 身宫 / 四化 总结(面向当前命盘)----
+export interface OverviewMutagen {
+  mutagen: Mutagen;
+  label: string;
+  star: string;
+  palace: PalaceName;
+  branch: string;
+  text: string;
+}
+export interface SoulBodyOverview {
+  palace: PalaceName;
+  branch: string;
+  majors: string[];
+  summary: string;
+}
+export interface ChartOverview {
+  soul: SoulBodyOverview;
+  body: SoulBodyOverview & { same: boolean };
+  mutagens: OverviewMutagen[];
+}
+
+/** 由当前命盘生成命宫 / 身宫 / 四化的综述文案。 */
+export function chartOverview(chart: ChartModel): ChartOverview {
+  const soulP = chart.palaces.find((p) => p.index === chart.soulIndex) ?? chart.palaces[0];
+  const bodyP = chart.palaces.find((p) => p.isBodyPalace) ?? soulP;
+  const majorsOf = (p: typeof soulP): string[] => p.stars.filter((s) => s.type === "major").map((s) => s.name);
+
+  const soulMajors = majorsOf(soulP);
+  const soulSummary = soulMajors.length
+    ? "命宫在" + soulP.earthlyBranch + "宫,由" + soulMajors.join("、") + "入守," + (STAR_ESSENCE[soulMajors[0]] ?? "随星性而显") + ";此乃一盘之主,奠定你的性格基调与人生总格。"
+    : "命宫在" + soulP.earthlyBranch + "宫,无主星坐守(空宫),性情多随对宫与三方会照之星而显,立身宜借势、守中而行。";
+
+  const same = bodyP.index === soulP.index;
+  const bodyMajors = majorsOf(bodyP);
+  const bodySummary = same
+    ? "身宫与命宫同宫,先天与后天合一;一生着力处与本性相合,性格贯彻始终、少有分歧。"
+    : (bodyMajors.length
+        ? "身宫在" + bodyP.earthlyBranch + "宫(" + bodyP.name + "),由" + bodyMajors.join("、") + "入守," + (STAR_ESSENCE[bodyMajors[0]] ?? "随星性而显") + ";主后天际遇与中晚年的着力方向。"
+        : "身宫在" + bodyP.earthlyBranch + "宫(" + bodyP.name + "),无主星坐守;后天作为多随环境流转,中晚年宜顺势借力。");
+
+  const order: Record<Mutagen, number> = { 禄: 0, 权: 1, 科: 2, 忌: 3 };
+  const mutagens: OverviewMutagen[] = [];
+  for (const pal of chart.palaces) {
+    for (const st of pal.stars) {
+      if (!st.mutagen) continue;
+      const info = MUTAGEN_LORE[st.mutagen];
+      mutagens.push({
+        mutagen: st.mutagen,
+        label: info.label,
+        star: st.name,
+        palace: pal.name,
+        branch: pal.earthlyBranch,
+        text: st.name + "星" + info.label + ",落于" + pal.name + "宫:" + PALACE_DOMAIN_NOUN[pal.name] + MUT_TONE[st.mutagen] + "。",
+      });
+    }
+  }
+  mutagens.sort((a, b) => order[a.mutagen] - order[b.mutagen]);
+
+  return {
+    soul: { palace: soulP.name, branch: soulP.earthlyBranch, majors: soulMajors, summary: soulSummary },
+    body: { palace: bodyP.name, branch: bodyP.earthlyBranch, majors: bodyMajors, same, summary: bodySummary },
+    mutagens,
+  };
 }
