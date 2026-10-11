@@ -96,11 +96,15 @@ export async function exportPNG(chart: ChartModel, div: Divination): Promise<voi
   ctx.fillStyle = COL.fg2; ctx.font = "400 23px 'Noto Sans SC', sans-serif";
   const sum = `命主 ${chart.soul} · 身主 ${chart.body} · ${chart.fiveElementsClass} · 生肖 ${chart.zodiac} · ${chart.sign}`;
   ctx.fillText(sum, PAD, 176);
-  const strokeLine = div.nameInfo ? `姓名笔画 ${div.nameInfo.total} · ` : "";
+  const ni = div.nameInfo;
+  const strokeLine = ni ? `姓 ${ni.surname || "—"}(${ni.surnameStrokes}) 名 ${ni.given || "—"}(${ni.givenStrokes}) · ` : "";
+  const bl = div.birthLunar;
+  const baziLine = `生辰八字 ${bl.yearBranch}年 农历${bl.month}月${bl.day}日 ${bl.hourBranch}时 · `;
   ctx.fillStyle = COL.fg3; ctx.font = "400 20px 'Noto Sans SC', sans-serif";
-  ctx.fillText(`${strokeLine}卜卦 ${div.castSolar} ${String(div.castHour).padStart(2, "0")}:00 · 农历 ${div.castLunarText}`, PAD, 212);
+  ctx.fillText(`${strokeLine}${baziLine}`, PAD, 208);
+  ctx.fillText(`卜卦 ${div.castSolar} ${String(div.castHour).padStart(2, "0")}:00 · 农历 ${div.castLunarText}`, PAD, 236);
 
-  let y = 268;
+  let y = 276;
   y += hexSection(ctx, y, "过去", "互卦 · 来路", div.hu, "来路与积累:");
   y += hexSection(ctx, y, "当下", "本卦 · 现状", div.ben, "此刻现状:");
   y += hexSection(ctx, y, "未来", "变卦 · 走向", div.bian, "未来走向:");

@@ -53,7 +53,12 @@ export function createDivination(root: HTMLElement): DivUI {
     if (!current) return;
     const d = current;
     const hex = hexOf(d, tense);
-    const nameLine = d.name ? `${d.name} · 姓名笔画 ${d.nameInfo?.total ?? 0}` : "未填姓名 · 仅以时间起卦";
+    const ni = d.nameInfo;
+    const nameLine = ni
+      ? `${d.name} · 姓 ${ni.surname || "—"}(${ni.surnameStrokes}) 名 ${ni.given || "—"}(${ni.givenStrokes})`
+      : "未填姓名 · 仅以生辰八字与时间起卦";
+    const bl = d.birthLunar;
+    const baziLine = `生辰八字 ${bl.yearBranch}年 农历${bl.month}月${bl.day}日 ${bl.hourBranch}时`;
     const castLine = `卜于 ${d.castSolar} ${String(d.castHour).padStart(2, "0")}:00 · 农历 ${d.castLunarText}`;
     const moveLine = tense !== "past"
       ? `第 ${hex.movingLine} 爻为动爻,主变化之机`
@@ -103,7 +108,7 @@ export function createDivination(root: HTMLElement): DivUI {
 
       ${classicHtml}
 
-      <div class="div-foot">${nameLine} · ${castLine}</div>
+      <div class="div-foot">${nameLine}<br>${baziLine} · ${castLine}</div>
     `;
     el.hidden = false;
   }

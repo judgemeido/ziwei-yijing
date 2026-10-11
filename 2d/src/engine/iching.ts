@@ -214,21 +214,33 @@ export function changedHexagram(hex: Hexagram): Hexagram {
 }
 
 export interface CastInput {
-  nameStrokes: number;   // 姓名(繁体/康熙)总笔画
-  yearBranch: string;    // 卜卦时间 年支
-  month: number;         // 卜卦 农历月
-  day: number;           // 卜卦 农历日
-  hourBranch: string;    // 卜卦 时支
+  surnameStrokes: number;   // 姓(康熙/繁体)笔画
+  givenStrokes: number;     // 名(康熙/繁体)笔画
+  birthYearBranch: string;  // 生辰八字 · 出生年支
+  birthMonth: number;       // 生辰 · 出生农历月
+  birthDay: number;         // 生辰 · 出生农历日
+  birthHourBranch: string;  // 生辰八字 · 出生时支
+  castYearBranch: string;   // 卜卦时间 · 年支
+  castMonth: number;        // 卜卦 · 农历月
+  castDay: number;          // 卜卦 · 农历日
+  castHourBranch: string;   // 卜卦时间 · 时支
 }
 
-/** 梅花易数「姓名 + 时间」起卦:姓名笔画并入年月日起上卦、再加时辰起下卦。 */
+/**
+ * 梅花易数「姓名 + 生辰八字 + 卜卦时间」复合起卦:
+ * 上卦取「姓笔画 + 生辰年支 + 生辰月 + 生辰日」(先天 · 本命根基),
+ * 下卦取「名笔画 + 生辰时支 + 卜卦月 + 卜卦日 + 卜卦时支」(后天 · 当下所问),
+ * 上下之和取余定动爻。姓与名分列上下、生辰八字与卜时并入,仅供文化娱乐。
+ */
 export function castByNameTime(input: CastInput): Hexagram {
-  const yearNum = BRANCH_NUM2[input.yearBranch] ?? 1;
-  const hourNum = BRANCH_NUM2[input.hourBranch] ?? 1;
-  const base = input.nameStrokes + yearNum + input.month + input.day;
-  const total = base + hourNum;
-  const upper = trigramByRemainder(base);
-  const lower = trigramByRemainder(total);
+  const bYear = BRANCH_NUM2[input.birthYearBranch] ?? 1;
+  const bHour = BRANCH_NUM2[input.birthHourBranch] ?? 1;
+  const cHour = BRANCH_NUM2[input.castHourBranch] ?? 1;
+  const upperSum = input.surnameStrokes + bYear + input.birthMonth + input.birthDay;
+  const lowerSum = input.givenStrokes + bHour + input.castMonth + input.castDay + cHour;
+  const upper = trigramByRemainder(upperSum);
+  const lower = trigramByRemainder(lowerSum);
+  const total = upperSum + lowerSum;
   const movingLine = (total % 6) === 0 ? 6 : total % 6;
   const lines = [...lower.lines, ...upper.lines];
   const name = HEX_NAME[`${upper.name}:${lower.name}`] ?? `${upper.nature}${lower.nature}`;
@@ -241,31 +253,37 @@ export function castByNameTime(input: CastInput): Hexagram {
 export function branchNum(branch: string): number { return BRANCH_NUM[branch] ?? 1; }
 
 export interface CastDerivInput {
-  nameStrokes: number;
-  nameParts: { label: string; value: number }[];
-  yearBranch: string; yearNum: number;
-  month: number; day: number;
-  hourBranch: string; hourNum: number;
+  surnameStrokes: number;
+  givenStrokes: number;
+  surnameLabel: string;   // 如 "李(7)"
+  givenLabel: string;     // 如 "世民(5+5)"
+  birthYearBranch: string; birthYearNum: number;
+  birthMonth: number; birthDay: number;
+  birthHourBranch: string; birthHourNum: number;
+  castYearBranch: string;
+  castMonth: number; castDay: number;
+  castHourBranch: string; castHourNum: number;
 }
 
-/** 由「姓名 + 时间」梅花起卦的推导步骤(与 castByNameTime 同式)。 */
+/** 由「姓名 + 生辰八字 + 卜卦时间」复合梅花起卦的推导步骤(与 castByNameTime 同式)。 */
 export function castDeriv(input: CastDerivInput): HexDeriv {
-  const base = input.nameStrokes + input.yearNum + input.month + input.day;
-  const total = base + input.hourNum;
-  const upper = trigramByRemainder(base);
-  const lower = trigramByRemainder(total);
+  const upperSum = input.surnameStrokes + input.birthYearNum + input.birthMonth + input.birthDay;
+  const lowerSum = input.givenStrokes + input.birthHourNum + input.castMonth + input.castDay + input.castHourNum;
+  const total = upperSum + lowerSum;
+  const upper = trigramByRemainder(upperSum);
+  const lower = trigramByRemainder(lowerSum);
   const movingLine = mod6(total);
   return {
-    method: "梅花易数 · 姓名并时间起卦",
+    method: "梅花易数 · 姓名并生辰八字与卜时复合起卦",
     parts: [
-      ...input.nameParts,
-      { label: "年支 " + input.yearBranch, value: input.yearNum },
-      { label: "农历月", value: input.month },
-      { label: "农历日", value: input.day },
+      { label: "姓 " + input.surnameLabel, value: input.surnameStrokes },
+      { label: "生辰年支 " + input.birthYearBranch, value: input.birthYearNum },
+      { label: "生辰月", value: input.birthMonth },
+      { label: "生辰日", value: input.birthDay },
     ],
-    base, baseMod: mod8(base), upperName: upper.name,
-    hourLabel: "时支 " + input.hourBranch, hourNum: input.hourNum,
-    total, totalMod: mod8(total), lowerName: lower.name,
+    base: upperSum, baseMod: mod8(upperSum), upperName: upper.name,
+    hourLabel: "名并卜时", hourNum: lowerSum,
+    total, totalMod: mod8(lowerSum), lowerName: lower.name,
     movingLine,
   };
 }

@@ -382,7 +382,10 @@ export function createForm(root: HTMLElement): FormUI {
     submitBtn.disabled = true;
     submitBtn.textContent = "起 卦 中…";
 
-    const dataPromise = Promise.all([buildChart(input), divine(name, castTime)]);
+    const dataPromise = buildChart(input).then(async (chart) => {
+      const divination = await divine(name, castTime, chart.lunar);
+      return [chart, divination] as const;
+    });
     // 起卦仪式动画:等待数据就绪并以真实卦象落爻,仪式收场即揭示命盘(消除滞后)。
     castingCeremony(dataPromise, ([chart, divination]) => {
       const soulBranch = chart.palaces.find((pp) => pp.index === chart.soulIndex)?.earthlyBranch ?? "子";

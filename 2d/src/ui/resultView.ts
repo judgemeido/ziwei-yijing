@@ -51,9 +51,12 @@ export function createResultView(root: HTMLElement): ResultView {
   function open(chart: ChartModel, div: Divination, benmingName: string): void {
     cur = { chart, div };
     const nameLine = div.name ? `${div.name}` : "无名氏";
-    const strokeLine = div.nameInfo
-      ? `姓名笔画 ${div.nameInfo.total}(${div.nameInfo.perChar.map((p) => `${p.char}${p.strokes}`).join(" ")})`
-      : "未填姓名,仅以时间起卦";
+    const ni = div.nameInfo;
+    const strokeLine = ni
+      ? `姓 ${ni.surname || "—"}(${ni.surnameStrokes}) · 名 ${ni.given || "—"}(${ni.givenStrokes})`
+      : "未填姓名,仅以生辰八字与时间起卦";
+    const bl = div.birthLunar;
+    const baziLine = `生辰八字 ${bl.yearBranch}年 农历${bl.month}月${bl.day}日 ${bl.hourBranch}时`;
     overlay.innerHTML = `
       <div class="rv-scrim" data-close></div>
       <div class="rv-sheet" role="document">
@@ -77,7 +80,7 @@ export function createResultView(root: HTMLElement): ResultView {
             <div class="rv-sum-item"><dt>星座</dt><dd>${chart.sign}</dd></div>
             <div class="rv-sum-item"><dt>本命卦</dt><dd>${benmingName}</dd></div>
           </div>
-          <p class="rv-castmeta">${strokeLine} · 卜卦 ${div.castSolar} ${String(div.castHour).padStart(2, "0")}:00 · 农历 ${div.castLunarText}</p>
+          <p class="rv-castmeta">${strokeLine}<br>${baziLine} · 卜卦 ${div.castSolar} ${String(div.castHour).padStart(2, "0")}:00 · 农历 ${div.castLunarText}</p>
           <div class="rv-hexes">
             ${hexBlock("过去", "互卦 · 来路", div.hu, "来路与积累:")}
             ${hexBlock("当下", "本卦 · 现状", div.ben, "此刻现状:")}
