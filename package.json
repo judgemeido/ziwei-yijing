@@ -10,7 +10,9 @@
     "build": "tsc -p 2d/tsconfig.json && vite build --config 2d/vite.config.ts",
     "build:2d": "tsc -p 2d/tsconfig.json && vite build --config 2d/vite.config.ts",
     "preview": "vite preview --config 2d/vite.config.ts",
-    "preview:2d": "vite preview --config 2d/vite.config.ts"
+    "preview:2d": "vite preview --config 2d/vite.config.ts",
+    "deploy": "npm run build:2d && wrangler deploy",
+    "cf:dev": "wrangler dev"
   },
   "dependencies": {
     "cnchar": "^3.2.6",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "typescript": "7.0.2",
-    "vite": "8.3.4"
+    "vite": "8.3.4",
+    "wrangler": "^4.149.0"
   }
 }
