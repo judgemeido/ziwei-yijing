@@ -2,6 +2,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ziwei-yijing",
   "compatibility_date": "2025-10-01",
+  "build": {
+    "command": "npm run build:2d"
+  },
   "assets": {
     "directory": "./2d/dist",
     "not_found_handling": "single-page-application"
