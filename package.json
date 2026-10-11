@@ -1,0 +1,24 @@
+{
+  "name": "xingshu-ziwei",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "星枢 — 以紫微斗数十二宫为核心的 2D 易经星盘命盘(纯前端,文化娱乐)",
+  "scripts": {
+    "dev": "vite --config 2d/vite.config.ts",
+    "dev:2d": "vite --config 2d/vite.config.ts",
+    "build": "tsc -p 2d/tsconfig.json && vite build --config 2d/vite.config.ts",
+    "build:2d": "tsc -p 2d/tsconfig.json && vite build --config 2d/vite.config.ts",
+    "preview": "vite preview --config 2d/vite.config.ts",
+    "preview:2d": "vite preview --config 2d/vite.config.ts"
+  },
+  "dependencies": {
+    "cnchar": "^3.2.6",
+    "cnchar-trad": "^3.2.6",
+    "iztro": "2.6.1"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  }
+}
